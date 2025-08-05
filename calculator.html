@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c&family=Rubik&display=swap"
+      rel="stylesheet"
+    />
+
+    <title>Calculator</title>
+  </head>
+  <body class="font-(--font-sans) text-[var(--text)] bg-[var(--primary)]">
+    <div id="root"></div>
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+      :root {
+        --text: #ebebeb;
+        --text-secondary: #6b6b6b;
+        --primary: #462878;
+        --background: #2d2a37;
+
+        --gradient: 180deg, rgba(0, 0, 0, 0.5) 0%, rgba(70, 70, 70, 0.5) 100%;
+
+        --gradient-hover: 180deg, rgba(0, 0, 0, 0.1) 0%,
+          rgba(255, 255, 255, 0.1) 100%;
+
+        --shadow: 0px 11px 7px 0px rgba(0, 0, 0, 0.01),
+          0px 7px 7px 0px rgba(0, 0, 0, 0.04),
+          0px 4px 6px 0px rgba(0, 0, 0, 0.1),
+          0px 2px 4px 0px rgba(0, 0, 0, 0.26),
+          0px 0px 2px 0px rgba(0, 0, 0, 0.29),
+          0px 2px 3px 0px rgba(255, 255, 255, 0.06) inset;
+
+        --font-sans: "Rubik", sans-serif;
+      }
+    </style>
+
+    <script type="text/babel">
+      const variantText = {
+        default: "text-xl",
+        muted: "text-xl text-[var(--text-secondary)]",
+        heading: "text-2xl",
+        blast: "text-3xl",
+      };
+
+      function Text({
+        as = "span",
+        children,
+        className = "",
+        variant = "default",
+        ...props
+      }) {
+        const Component = as;
+        return (
+          <Component
+            className={`${variantText[variant]} ${className}`}
+            {...props}
+          >
+            {children}
+          </Component>
+        );
+
+        // return React.createElement(as, children, {
+        //   className: `${variantText[variant]} ${className}`,
+        //   ...props,
+        // });
+      }
+
+      const variantButton = {
+        default: "bg-[var(--background)]",
+        primary: "bg-[var(--primary)]",
+      };
+
+      function Button({ variant = "default", className, children, ...props }) {
+        return (
+          <Text
+            as="button"
+            variant="heading"
+            style={{
+              color: "var(--text)",
+              backgroundImage: "linear-gradient(var(--gradient))",
+              boxShadow: "var(--shadow)",
+              fontFamily: "var(--font-sans)",
+            }}
+            className={`flex items-center justify-center rounded-xl p-3 cursor-pointer
+              text-(--text) bg-linear-(--gradient) hover:bg-linear-(--gradient-hover) shadow-(--shadow)
+              ${className}
+               ${variantButton[variant]}`}
+            {...props}
+          >
+            {children}
+          </Text>
+        );
+      }
+
+      function App() {
+        return (
+          <main className="py-28 px-4">
+            <Button> C </Button>
+          </main>
+        );
+      }
+      const element = document.getElementById("root");
+      const root = ReactDOM.createRoot(element);
+      root.render(<App />);
+    </script>
+  </body>
+</html>
