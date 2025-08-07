@@ -13,7 +13,9 @@
 
     <title>Calculator</title>
   </head>
-  <body class="font-(--font-sans) text-[var(--text)] bg-[var(--primary)]">
+  <body
+    class="min-h-screen font-(--font-sans) text-[var(--text)] bg-linear-[180deg,_#807ECE_0%,#8E7ECE_100%]"
+  >
     <div id="root"></div>
     <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
@@ -24,7 +26,7 @@
       :root {
         --text: #ebebeb;
         --text-secondary: #6b6b6b;
-        --primary: #462878;
+        --primary: #683eac;
         --background: #2d2a37;
 
         --gradient: 180deg, rgba(0, 0, 0, 0.5) 0%, rgba(70, 70, 70, 0.5) 100%;
@@ -40,6 +42,10 @@
           0px 2px 3px 0px rgba(255, 255, 255, 0.06) inset;
 
         --font-sans: "Rubik", sans-serif;
+      }
+
+      .--gradient-hover:hover {
+        background-image: linear-gradient(var(--gradient-hover));
       }
     </style>
 
@@ -61,7 +67,7 @@
         const Component = as;
         return (
           <Component
-            className={`${variantText[variant]} ${className}`}
+            className={`${variantText[variant]} ${className ? className : ""}`}
             {...props}
           >
             {children}
@@ -84,15 +90,9 @@
           <Text
             as="button"
             variant="heading"
-            style={{
-              color: "var(--text)",
-              backgroundImage: "linear-gradient(var(--gradient))",
-              boxShadow: "var(--shadow)",
-              fontFamily: "var(--font-sans)",
-            }}
             className={`flex items-center justify-center rounded-xl p-3 cursor-pointer
-              text-(--text) bg-linear-(--gradient) hover:bg-linear-(--gradient-hover) shadow-(--shadow)
-              ${className}
+              text-(--text) bg-linear-(--gradient) --gradient-hover shadow-(--shadow)
+              ${className ? className : ""}
                ${variantButton[variant]}`}
             {...props}
           >
@@ -101,10 +101,117 @@
         );
       }
 
+      function Card({ children, className, ...props }) {
+        return (
+          <div
+            className={` bg-(--background) shadow-(--shadow) rounded-2xl max-w-[356px] ${
+              className ? className : ""
+            }`}
+          >
+            {children}
+          </div>
+        );
+      }
+
+      function CauculatorDisplay({ operation, result }) {
+        return (
+          <div
+            className={`
+              flex flex-col gap-2 px-[1.375rem]
+            `}
+          >
+            <Text
+              as="div"
+              variant="muted"
+              className={`flex items-center justify-end`}
+            >
+              {operation}
+            </Text>
+            <div
+              className={`
+                flex items-center justify-between
+              `}
+            >
+              <Text variant="muted">=</Text>
+              <Text variant="blast"> {result} </Text>
+            </div>
+          </div>
+        );
+      }
+
+      function Cauculator() {
+        return (
+          <Card
+            className={`
+            flex flex-col gap-[1.625rem] w-[22.25rem] pt-14 pb-8 px-8
+            cursor-default select-none
+          `}
+          >
+            <CauculatorDisplay operation="1 + 1" result="2" />
+            <div classname={`flex flex-col gap-3`}>
+              <div className={`flex gap-3`}>
+                <Button className={`w-16 h-16`}>CE</Button>
+                <Button className={`flex-1`}>C</Button>
+                <Button className={`w-16 h-16`} variant="primary">
+                  /
+                </Button>
+              </div>
+              <div className={`flex gap-3 mt-3`}>
+                <Button className={`w-16 h-16`}>7</Button>
+                <Button className={`w-16 h-16`}>8</Button>
+                <Button className={`w-16 h-16`}>9</Button>
+                <Button className={`w-16 h-16`} variant="primary">
+                  x
+                </Button>
+              </div>
+              <div className={`flex gap-3 mt-3`}>
+                <Button className={`w-16 h-16`}>4</Button>
+                <Button className={`w-16 h-16`}>5</Button>
+                <Button className={`w-16 h-16`}>6</Button>
+                <Button className={`w-16 h-16`} variant="primary">
+                  -
+                </Button>
+              </div>
+              <div className={`flex gap-3 mt-3`}>
+                <Button className={`w-16 h-16`}>1</Button>
+                <Button className={`w-16 h-16`}>2</Button>
+                <Button className={`w-16 h-16`}>3</Button>
+                <Button className={`w-16 h-16`} variant="primary">
+                  +
+                </Button>
+              </div>
+              <div className={`flex gap-3 mt-3`}>
+                <Button className={`flex-1`}>0</Button>
+                <Button className={`w-16 h-16`}>,</Button>
+                <Button className={`w-16 h-16`} variant="primary">
+                  =
+                </Button>
+              </div>
+            </div>
+          </Card>
+        );
+      }
+
+      function History() {
+        return (
+          <Card className=" py-10 px-8 ">
+            <Text as="h1" variant="heading" className="mb-4">
+              Historico de operacoes
+            </Text>
+            <ul className=" flex flex-col gap-3">
+              <Text as="li">1 + 1 = 2</Text>
+              <Text as="li">2 + 3 + 1 = 6</Text>
+              <Text as="li">3 + 2 = 5</Text>
+            </ul>
+          </Card>
+        );
+      }
+
       function App() {
         return (
-          <main className="py-28 px-4">
-            <Button> C </Button>
+          <main className="flex flex-col sm:flex-row justify-center gap-2 py-28 px-4">
+            <Cauculator />
+            <History />
           </main>
         );
       }
