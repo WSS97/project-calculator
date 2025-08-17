@@ -26,8 +26,9 @@
       :root {
         --text: #ebebeb;
         --text-secondary: #6b6b6b;
-        --primary: #683eac;
+        --primary: #6f43b6;
         --background: #2d2a37;
+        --unique: #a570ff;
 
         --gradient: 180deg, rgba(0, 0, 0, 0.5) 0%, rgba(70, 70, 70, 0.5) 100%;
 
@@ -83,6 +84,7 @@
       const variantButton = {
         default: "bg-[var(--background)]",
         primary: "bg-[var(--primary)]",
+        diferent: "bg-[var(--unique)]",
       };
 
       function Button({ variant = "default", className, children, ...props }) {
@@ -113,6 +115,37 @@
         );
       }
 
+      const buttons = [
+        [
+          { input: "CE" },
+          { input: "C", className: "flex-1 h-16" },
+          { input: "/", variant: "primary" },
+        ],
+        [
+          { input: "7" },
+          { input: "8" },
+          { input: "9" },
+          { input: "*", variant: "primary" },
+        ],
+        [
+          { input: "4" },
+          { input: "5" },
+          { input: "6" },
+          { input: "-", variant: "primary" },
+        ],
+        [
+          { input: "1" },
+          { input: "2" },
+          { input: "3" },
+          { input: "+", variant: "primary" },
+        ],
+        [
+          { input: "0", className: "flex-1 h-16" },
+          { input: "," },
+          { input: "=", variant: "diferent", className: "w-16 h-16" },
+        ],
+      ];
+
       function CauculatorDisplay({ operation, result }) {
         return (
           <div
@@ -123,23 +156,56 @@
             <Text
               as="div"
               variant="muted"
-              className={`flex items-center justify-end`}
+              className={`flex items-center justify-end h-7`}
             >
-              {operation}
+              {result && operation}
             </Text>
             <div
               className={`
-                flex items-center justify-between
+                flex items-center justify-between h-9
               `}
             >
               <Text variant="muted">=</Text>
-              <Text variant="blast"> {result} </Text>
+              <Text variant="blast"> {result || operation} </Text>
             </div>
           </div>
         );
       }
 
-      function Cauculator() {
+      function Cauculator({ addHistory }) {
+        const [operation, setOperation] = React.useState("");
+        const [result, setResult] = React.useState("");
+
+        function handleClick(input) {
+          if (input == "C") {
+            setResult("");
+            setOperation("");
+            return;
+          }
+
+          if (input == "CE") {
+            result ? setResult("") : setOperation(operation.slice(0, -1));
+            return;
+          }
+
+          if (result) {
+            setOperation(isNaN(input) ? `${result}${input}` : input);
+            setResult("");
+            return;
+          }
+
+          if (input === "=") {
+            const operationResult = eval(operation.replace(/,/g, "."));
+            const parseResult = operationResult.toString().replace(/\./g, ",");
+            setResult(parseResult);
+            const historyOperation = `${operation}=${parseResult}`;
+            addHistory(historyOperation);
+            return;
+          }
+
+          setOperation(`${operation}${input}`);
+        }
+
         return (
           <Card
             className={`
@@ -147,71 +213,55 @@
             cursor-default select-none
           `}
           >
-            <CauculatorDisplay operation="1 + 1" result="2" />
-            <div classname={`flex flex-col gap-3`}>
-              <div className={`flex gap-3`}>
-                <Button className={`w-16 h-16`}>CE</Button>
-                <Button className={`flex-1`}>C</Button>
-                <Button className={`w-16 h-16`} variant="primary">
-                  /
-                </Button>
-              </div>
-              <div className={`flex gap-3 mt-3`}>
-                <Button className={`w-16 h-16`}>7</Button>
-                <Button className={`w-16 h-16`}>8</Button>
-                <Button className={`w-16 h-16`}>9</Button>
-                <Button className={`w-16 h-16`} variant="primary">
-                  x
-                </Button>
-              </div>
-              <div className={`flex gap-3 mt-3`}>
-                <Button className={`w-16 h-16`}>4</Button>
-                <Button className={`w-16 h-16`}>5</Button>
-                <Button className={`w-16 h-16`}>6</Button>
-                <Button className={`w-16 h-16`} variant="primary">
-                  -
-                </Button>
-              </div>
-              <div className={`flex gap-3 mt-3`}>
-                <Button className={`w-16 h-16`}>1</Button>
-                <Button className={`w-16 h-16`}>2</Button>
-                <Button className={`w-16 h-16`}>3</Button>
-                <Button className={`w-16 h-16`} variant="primary">
-                  +
-                </Button>
-              </div>
-              <div className={`flex gap-3 mt-3`}>
-                <Button className={`flex-1`}>0</Button>
-                <Button className={`w-16 h-16`}>,</Button>
-                <Button className={`w-16 h-16`} variant="primary">
-                  =
-                </Button>
-              </div>
+            <CauculatorDisplay operation={operation} result={result} />
+            <div className={`flex flex-col gap-3`}>
+              {buttons.map((row, index) => (
+                <div key={`row-${index}`} className={`flex gap-3 mb-2`}>
+                  {row.map((button) => (
+                    <Button
+                      key={button.input}
+                      className={button.className || `w-16 h-16`}
+                      variant={button.variant}
+                      onClick={() => handleClick(button.input)}
+                    >
+                      {button.input}
+                    </Button>
+                  ))}
+                </div>
+              ))}
             </div>
           </Card>
         );
       }
 
-      function History() {
+      function History({ historyDisplay }) {
         return (
           <Card className=" py-10 px-8 ">
             <Text as="h1" variant="heading" className="mb-4">
               Historico de operacoes
             </Text>
             <ul className=" flex flex-col gap-3">
-              <Text as="li">1 + 1 = 2</Text>
-              <Text as="li">2 + 3 + 1 = 6</Text>
-              <Text as="li">3 + 2 = 5</Text>
+              {historyDisplay.map((name, index) => (
+                <Text as="li" key={`${index}-${name}`}>
+                  {name}
+                </Text>
+              ))}
             </ul>
           </Card>
         );
       }
 
       function App() {
+        const [historyDisplay, setHistoryDisplay] = React.useState([]);
+
+        function addHistory(entry) {
+          setHistoryDisplay((prev) => [entry, ...prev]);
+        }
+
         return (
           <main className="flex flex-col sm:flex-row justify-center gap-2 py-28 px-4">
-            <Cauculator />
-            <History />
+            <Cauculator addHistory={addHistory} />
+            <History historyDisplay={historyDisplay} />
           </main>
         );
       }
