@@ -146,6 +146,38 @@
         ],
       ];
 
+      const HistoryContext = React.createContext();
+
+      function HistoryProvider({ children }) {
+        const [historyDisplay, setHistoryDisplay] = React.useState([]);
+        const historyStorageKey = "history";
+
+        React.useEffect(() => {
+          const savedHistory = localStorage.getItem(historyStorageKey);
+          savedHistory && setHistoryDisplay(JSON.parse(savedHistory));
+        }, []);
+
+        function alterHistoryDisplay(historyOperation) {
+          setHistoryDisplay((prev) => {
+            const historyStorage = [...prev, historyOperation];
+
+            localStorage.setItem(
+              historyStorageKey,
+              JSON.stringify(historyStorage)
+            );
+            return historyStorage;
+          });
+        }
+
+        return (
+          <HistoryContext.Provider
+            value={{ historyDisplay, alterHistoryDisplay }}
+          >
+            {children}
+          </HistoryContext.Provider>
+        );
+      }
+
       function CauculatorDisplay({ operation, result }) {
         return (
           <div
@@ -172,11 +204,12 @@
         );
       }
 
-      function Cauculator({ addHistory }) {
+      function useCalculator() {
         const [operation, setOperation] = React.useState("");
         const [result, setResult] = React.useState("");
+        const { alterHistoryDisplay } = React.useContext(HistoryContext);
 
-        function handleClick(input) {
+        function doOperation(input) {
           if (input == "C") {
             setResult("");
             setOperation("");
@@ -199,11 +232,25 @@
             const parseResult = operationResult.toString().replace(/\./g, ",");
             setResult(parseResult);
             const historyOperation = `${operation}=${parseResult}`;
-            addHistory(historyOperation);
+            alterHistoryDisplay(historyOperation);
             return;
           }
 
           setOperation(`${operation}${input}`);
+        }
+
+        return {
+          operation,
+          result,
+          doOperation,
+        };
+      }
+
+      function Cauculator() {
+        const { operation, result, doOperation } = useCalculator();
+
+        function handleClick(input) {
+          doOperation(input);
         }
 
         return (
@@ -234,7 +281,9 @@
         );
       }
 
-      function History({ historyDisplay }) {
+      function History() {
+        const { historyDisplay } = React.useContext(HistoryContext);
+
         return (
           <Card className=" py-10 px-8 ">
             <Text as="h1" variant="heading" className="mb-4">
@@ -252,16 +301,12 @@
       }
 
       function App() {
-        const [historyDisplay, setHistoryDisplay] = React.useState([]);
-
-        function addHistory(entry) {
-          setHistoryDisplay((prev) => [entry, ...prev]);
-        }
-
         return (
           <main className="flex flex-col sm:flex-row justify-center gap-2 py-28 px-4">
-            <Cauculator addHistory={addHistory} />
-            <History historyDisplay={historyDisplay} />
+            <HistoryProvider>
+              <Cauculator />
+              <History />
+            </HistoryProvider>
           </main>
         );
       }
